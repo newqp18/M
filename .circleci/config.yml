@@ -22,10 +22,9 @@ jobs:
             chmod 600 ~/.ssh/id_rsa
             ssh -o StrictHostKeyChecking=no ec2-user@your-ec2-public-ip "
               cd /path/to/your/bot &&
-              git pull && 
+              git pull &&
               chmod +x bgmi &&  # Ensure the bgmi binary is executable
-              python bot.py & # Run the bot in the background
-            # You can replace the last line with a process manager for better persistence if necessary
+              nohup python bot.py &"  # Run the bot in the background
 
 workflows:
   version: 2

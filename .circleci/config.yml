@@ -1,4 +1,4 @@
-      version: 2.1
+version: 2.1
 
 jobs:
   build:
@@ -29,4 +29,3 @@ workflows:
   build:
     jobs:
       - build  # The "build" job is run in this workflow
-      

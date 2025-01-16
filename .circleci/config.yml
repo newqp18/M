@@ -1,4 +1,4 @@
-version: 2.1
+      version: 2.1
 
 jobs:
   build:
@@ -14,17 +14,15 @@ jobs:
             pip install telebot  # Install Python dependencies if any
 
       - run:
-          name: Deploy to EC2 instance
+          name: Make bgmi binary executable
           command: |
-            # Set up SSH key for EC2 (use CircleCI environment variables)
-            mkdir -p ~/.ssh
-            echo "$EC2_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-            chmod 600 ~/.ssh/id_rsa
-            ssh -o StrictHostKeyChecking=no ec2-user@your-ec2-public-ip "
-              cd /path/to/your/bot &&
-              git pull &&
-              chmod +x bgmi &&  # Ensure the bgmi binary is executable
-              nohup python bot.py &"  # Run the bot in the background
+            chmod +x bgmi  # Ensure the bgmi binary is executable
+
+      - run:
+          name: Run the bot for 12 hours
+          command: |
+            nohup python bot.py &  # Run the Python bot in the background
+            sleep 43200  # Sleep for 12 hours (43200 seconds) to keep the job alive
 
 workflows:
   version: 2

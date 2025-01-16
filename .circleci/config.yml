@@ -1,31 +1,46 @@
-version: 2.1
+trigger:
+  branches:
+    include:
+      - main  # This triggers the pipeline on changes to the 'main' branch
+
+schedules:
+  - cron: "*/5 * * * *"  # This triggers the pipeline every 5 minutes
+    displayName: "Run every 5 minutes"
+    branches:
+      include:
+        - main  # Ensures the schedule runs on the 'main' branch
+
+pool:
+  vmImage: 'ubuntu-latest'  # The VM image to use for the pipeline
 
 jobs:
-  build:
-    docker:
-      - image: circleci/python:3.9  # Use a Docker image with Python pre-installed
+  - job: BuildAndRun
+    displayName: 'Build and Run bgmi binary with bot.py'
+
     steps:
-      - checkout  # Checkout the source code from the repository
 
-      - run:
-          name: Install dependencies
-          command: |
-            python -m pip install --upgrade pip
-            pip install telebot  # Install Python dependencies if any
+      # Step 1: Checkout the code from the repository
+      - task: Checkout@1
+        displayName: 'Checkout Repository'
 
-      - run:
-          name: Make bgmi binary executable
-          command: |
-            chmod +x bgmi  # Ensure the bgmi binary is executable
+      # Step 2: Install Python and dependencies (if bot.py requires any)
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.x'
+          addToPath: true
 
-      - run:
-          name: Run the bot for 12 hours
-          command: |
-            nohup python bot.py &  # Run the Python bot in the background
-            sleep 43200  # Sleep for 12 hours (43200 seconds) to keep the job alive
+      - script: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt  # Install any required dependencies (if a requirements.txt exists)
+        displayName: 'Install Python dependencies'
 
-workflows:
-  version: 2
-  build:
-    jobs:
-      - build  # The "build" job is run in this workflow
+      # Step 3: Copy the binary file (bgmi) to the appropriate directory (if needed)
+      - script: |
+          mkdir -p /app/bin  # Create a directory to store the binary file (adjust the path if needed)
+          cp $(Build.SourcesDirectory)/path/to/bgmi /app/bin/  # Ensure you specify the correct path to the bgmi binary
+        displayName: 'Copy bgmi binary file'
+
+      # Step 4: Run the Python script bot.py
+      - script: |
+          python $(Build.SourcesDirectory)/path/to/bot.py  # Make sure to specify the correct path to the bot.py script
+        displayName: 'Run bot.py script'

@@ -18,12 +18,10 @@ jobs:
     displayName: 'Build and Run bgmi binary with bot.py'
 
     steps:
-
-      # Step 1: Checkout the code from the repository
       - task: Checkout@1
         displayName: 'Checkout Repository'
 
-      # Step 2: Install Python and dependencies (if bot.py requires any)
+      # Install Python and dependencies (if bot.py requires any)
       - task: UsePythonVersion@0
         inputs:
           versionSpec: '3.x'
@@ -31,16 +29,22 @@ jobs:
 
       - script: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt  # Install any required dependencies (if a requirements.txt exists)
+          pip install telebot  # Install any required dependencies (if a requirements.txt exists)
         displayName: 'Install Python dependencies'
 
-      # Step 3: Copy the binary file (bgmi) to the appropriate directory (if needed)
+      # Copy the binary file (bgmi) to the appropriate directory
       - script: |
           mkdir -p /app/bin  # Create a directory to store the binary file (adjust the path if needed)
           cp $(Build.SourcesDirectory)/path/to/bgmi /app/bin/  # Ensure you specify the correct path to the bgmi binary
         displayName: 'Copy bgmi binary file'
 
-      # Step 4: Run the Python script bot.py
+      # Make the bgmi binary executable using chmod +x
       - script: |
-          python $(Build.SourcesDirectory)/path/to/bot.py  # Make sure to specify the correct path to the bot.py script
+          chmod +x /app/bin/bgmi  # Make bgmi binary executable
+        displayName: 'Make bgmi executable'
+
+      # Run the Python script bot.py using python3
+      - script: |
+          python3 $(Build.SourcesDirectory)/path/to/bot.py  # Run the bot.py script with python3
         displayName: 'Run bot.py script'
+        

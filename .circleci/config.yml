@@ -1,0 +1,35 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.9  # Use a Docker image with Python pre-installed
+    steps:
+      - checkout  # Checkout the source code from the repository
+
+      - run:
+          name: Install dependencies
+          command: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt  # Install Python dependencies if any
+
+      - run:
+          name: Deploy to EC2 instance
+          command: |
+            # Set up SSH key for EC2 (use CircleCI environment variables)
+            mkdir -p ~/.ssh
+            echo "$EC2_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+            chmod 600 ~/.ssh/id_rsa
+            ssh -o StrictHostKeyChecking=no ec2-user@your-ec2-public-ip "
+              cd /path/to/your/bot &&
+              git pull && 
+              chmod +x bgmi &&  # Ensure the bgmi binary is executable
+              python bot.py & # Run the bot in the background
+            # You can replace the last line with a process manager for better persistence if necessary
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build  # The "build" job is run in this workflow
+      
